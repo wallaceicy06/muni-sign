@@ -1,6 +1,9 @@
 # Ignore swap files.
 *.swp
 
+# Ignore python byte code.
+*.pyc
+
 # Ignore generated protos.
 *.pb.go
 *_pb2.py
