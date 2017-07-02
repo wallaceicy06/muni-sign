@@ -5,7 +5,9 @@
 <div>
   <h3>Current Configuration</h3>
   <div>Agency: <span>{{.Agency}}</span></div>
-  <div>Stop ID: <span>{{index .StopIds 0}}</span></div>
+  {{range .StopIds}}
+    <div>Stop ID: <span>{{.}}</span></div>
+  {{end}}
 </div>
 
 <div>
