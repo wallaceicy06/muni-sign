@@ -1,0 +1,18 @@
+<h1>MUNI Sign Configuration</h1>
+
+<p>Welcome!</p>
+
+<div>
+  <h3>Current Configuration</h3>
+  <div>Agency: <span>{{.Agency}}</span></div>
+  <div>Stop ID: <span>{{index .StopIds 0}}</span></div>
+</div>
+
+<div>
+  <h3>New Configuration</h3>
+  <form action="/submit">
+    <div>Agency: <input type="text" name="agency"></div>
+    <div>Stop ID: <input type="text" name="stopId"></div>
+    <input type="submit" value="Submit">
+  </form>
+</div>

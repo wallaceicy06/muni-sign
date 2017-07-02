@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+message Empty {
+}
+
+message Configuration {
+  // The agency to list predictions for.
+  string agency = 1;
+
+  // The list of stop ids to display predictions for.
+  repeated string stop_ids = 2;
+}
+
+service Nextbus { 
+  rpc ListPredictions (ListPredictionsRequest) returns (ListPredictionsResponse);
+}
+
+message ListPredictionsRequest {
+  // The string identifier for the agency to list predictions for. (required)
+  string agency = 1;
+
+  // The string stop id to list predictions for. (required)
+  string stop_id = 2;
+}
+
+message ListPredictionsResponse {
+  repeated Prediction predictions = 1;
+}
+
+message Prediction {
+  // The string indentifier for the route that this prediction is for.
+  string route = 1;
+
+  // The string name for the destination to which the transport is bound.
+  string destination = 2;
+
+  // The next arrivals for the requested stop (sorted from lowest to highest, 
+  // in minutes).
+  repeated int32 next_arrivals = 3;
+}
+
+service DisplayDriver {
+  rpc Write(WriteRequest) returns (Empty);
+}
+
+message WriteRequest {
+  string message = 1;
+  Color color = 2;
+}
+
+message Color {
+  double red = 1;
+  double green = 2;
+  double blue = 3;
+}
