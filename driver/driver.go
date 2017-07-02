@@ -38,6 +38,8 @@ var colors = []*pb.Color{
 }
 
 func main() {
+	flag.Parse()
+
 	dspConn, err := grpc.Dial(*displayAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error connecting to display server: %v", err)
