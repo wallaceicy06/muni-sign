@@ -17,7 +17,7 @@ var configFilePath = flag.String("config_file", "", "the path to the file that s
 var port = flag.Int("port", 8080, "the port to serve this webserver")
 
 type Server struct {
-	cfg *config.SignConfig
+	cfg config.SignConfig
 }
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	sc := config.NewSignConfig(*configFilePath)
+	sc := config.NewFileSignConfig(*configFilePath)
 	server := &Server{
 		cfg: sc,
 	}

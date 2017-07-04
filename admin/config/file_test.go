@@ -63,7 +63,7 @@ func TestGet(t *testing.T) {
 			fs = afero.NewMemMapFs()
 			afero.WriteFile(fs, goodFilePath, []byte(test.fileData), 0644)
 
-			sc := NewSignConfig(test.filePath)
+			sc := NewFileSignConfig(test.filePath)
 			got, err := sc.Get()
 
 			if test.wantErr {
@@ -117,7 +117,7 @@ func TestPut(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			fs = afero.NewMemMapFs()
 
-			sc := NewSignConfig(test.filePath)
+			sc := NewFileSignConfig(test.filePath)
 			err := sc.Put(test.cfg)
 
 			if test.wantErr {
