@@ -69,8 +69,14 @@ func (s *server) rootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
 		return
 	}
-	if err := templates.ExecuteTemplate(w, "index.html", c); err != nil {
+	// Make sure that the configuration is not nil so that the server can return
+	// an error before rendering the template.
+	if c == nil {
 		http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
+		return
+	}
+	if err := templates.ExecuteTemplate(w, "index.html", c); err != nil {
+		log.Printf("Problem rendering HTML template: %v", err)
 		return
 	}
 }
