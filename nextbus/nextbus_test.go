@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	nb "github.com/dinedal/nextbus"
+	pb "github.com/wallaceicy06/muni-sign/proto"
 )
 
 type fakeNextbus struct {
@@ -22,7 +23,9 @@ func TestServing(t *testing.T) {
 	srv := newServer(testPort, &fakeNextbus{}).serve()
 	defer srv.Stop()
 
-	if _, err := grpc.Dial(fmt.Sprintf(":%d", testPort), grpc.WithInsecure()); err != nil {
+	conn, err := grpc.Dial(fmt.Sprintf(":%d", testPort), grpc.WithInsecure())
+	if err != nil {
 		t.Fatalf("Could not reach Nextbus RPC server.")
 	}
+	defer conn.Close()
 }
