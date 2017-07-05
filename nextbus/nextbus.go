@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -15,12 +17,12 @@ import (
 
 type server struct{}
 
-const (
-	port = ":8080"
-)
+var port = flag.Int("port", 8081, "the port to host the nextbus server on")
 
 func main() {
-	lis, err := net.Listen("tcp", port)
+	flag.Parse()
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
