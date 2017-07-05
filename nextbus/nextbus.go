@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"strconv"
 
 	"golang.org/x/net/context"
@@ -15,22 +17,51 @@ import (
 	pb "github.com/wallaceicy06/muni-sign/proto"
 )
 
-type server struct{}
+type nextbus interface {
+	GetStopPredictions(agencyTag string, stopID string) ([]nb.PredictionData, error)
+}
+
+type server struct {
+	nbClient nextbus
+	port     int
+}
 
 var port = flag.Int("port", 8081, "the port to host the nextbus server on")
 
 func main() {
 	flag.Parse()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	srv := newServer(*port, nb.DefaultClient).serve()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt)
+	<-sigs
+	srv.GracefulStop()
+	os.Exit(0)
+}
+
+func newServer(port int, nbClient nextbus) *server {
+	return &server{
+		port:     port,
+		nbClient: nbClient,
+	}
+}
+
+func (s *server) serve() *grpc.Server {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
-	pb.RegisterNextbusServer(s, &server{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	grpcSrv := grpc.NewServer()
+	pb.RegisterNextbusServer(grpcSrv, s)
+
+	go func() {
+		if err := grpcSrv.Serve(lis); err != nil {
+			log.Printf("grpc server stopped: %v", err)
+		}
+	}()
+
+	return grpcSrv
 }
 
 func (s *server) ListPredictions(ctx context.Context, req *pb.ListPredictionsRequest) (*pb.ListPredictionsResponse, error) {
