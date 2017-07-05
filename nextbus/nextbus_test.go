@@ -7,7 +7,6 @@ import (
 	"google.golang.org/grpc"
 
 	nb "github.com/dinedal/nextbus"
-	pb "github.com/wallaceicy06/muni-sign/proto"
 )
 
 type fakeNextbus struct {
