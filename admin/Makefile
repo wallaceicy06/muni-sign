@@ -1,5 +1,5 @@
 # Go parameters
-GOCMD=go
+GOCMD=godep go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOINSTALL=$(GOCMD) install

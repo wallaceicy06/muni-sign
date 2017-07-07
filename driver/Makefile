@@ -8,8 +8,8 @@ GODEP=$(GOTEST) -i
 GOFMT=gofmt -w
 
 # Package lists
-TOPLEVEL_PKG := github.com/wallaceicy06/muni-sign/nextbus
-ALL_LIST := .
+TOPLEVEL_PKG := github.com/wallaceicy06/muni-sign/driver
+ALL_LIST := . config
 
 BUILD_LIST = $(foreach int, $(ALL_LIST), $(int)_build)
 CLEAN_LIST = $(foreach int, $(ALL_LIST), $(int)_clean)
@@ -40,4 +40,4 @@ $(IREF_LIST): %_iref:
 $(TEST_LIST): %_test:
 	$(GOTEST) $(TOPLEVEL_PKG)/$*
 $(FMT_TEST): %_fmt:
-	$(GOFMT) ./$*
+	$
