@@ -9,7 +9,7 @@ GOFMT=gofmt -w
 
 # Package lists
 TOPLEVEL_PKG := github.com/wallaceicy06/muni-sign/driver
-ALL_LIST := . config
+ALL_LIST := .
 
 BUILD_LIST = $(foreach int, $(ALL_LIST), $(int)_build)
 CLEAN_LIST = $(foreach int, $(ALL_LIST), $(int)_clean)
