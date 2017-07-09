@@ -2,10 +2,17 @@ language: go
 
 go:
   - 1.8
+addons:
+  apt:
+    packages:
+      - gcc
+      - g++
+      - dh-autoreconf
 before_script:
   - curl -L -O https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
   - unzip protoc-3.3.0-linux-x86_64.zip -d protoc && rm protoc-3.3.0-linux-x86_64.zip
   - export PATH=$(pwd)/protoc/bin:"${PATH}"
-  - curl -L https://github.com/grpc/grpc/archive/v1.4.1.tar.gz | tar zx
-  - cd grpc-1.4.1 && make grpc_python_plugin
+  - git clone https://github.com/grpc/grpc.git
+  - cd grpc && git checkout tags/v1.4.1
+  - git submodule update --init && make grpc_python_plugin
   - export PATH=$(pwd)/grpc-1.4.1/bin/opt:"${PATH}"
