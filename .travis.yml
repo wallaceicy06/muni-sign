@@ -5,5 +5,5 @@ go:
 before_script:
   - sudo apt-get update && sudo apt-get install protobuf-compiler
   - curl -L https://github.com/grpc/grpc/archive/v1.4.1.tar.gz | tar zx
-  - cd grpc-1.4.1 && make_grpc_python_plugin
+  - cd grpc-1.4.1 && make grpc_python_plugin
   - export PATH=$(pwd)/grpc-1.4.1/bin/opt:"${PATH}"
