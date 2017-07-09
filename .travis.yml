@@ -18,3 +18,5 @@ before_script:
   - cd grpc && git checkout tags/v1.4.1
   - git submodule update --init && make grpc_python_plugin
   - export PATH=$(pwd)/grpc-1.4.1/bin/opt:"${PATH}"
+script:
+  - echo $(c++ --version) && echo $(g++ --version)
