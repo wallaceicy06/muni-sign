@@ -5,8 +5,8 @@ go:
 addons:
   apt:
     packages:
-      - gcc
-      - g++
+      - gcc-4.8
+      - g++-4.8
       - dh-autoreconf
 before_script:
   - curl -L -O https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
