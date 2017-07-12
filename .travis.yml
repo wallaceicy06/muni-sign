@@ -9,4 +9,4 @@ addons:
       - python-pip
 before_script:
   - go get -u google.golang.org/grpc
-  - sudo pip install grpcio
+  - sudo pip install grpcio-tools
