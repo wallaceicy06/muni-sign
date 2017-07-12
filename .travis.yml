@@ -8,5 +8,6 @@ addons:
       - python
       - python-pip
 before_script:
-  - go get google.golang.org/grpc
+  - go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
+  - go get -u google.golang.org/grpc
   - sudo pip install grpcio
