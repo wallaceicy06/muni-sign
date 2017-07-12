@@ -4,19 +4,9 @@ go:
   - 1.8
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
-      - gcc-5
-      - g++-5
-      - dh-autoreconf
+      - python
+      - python-pip
 before_script:
-  - curl -L -O https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip
-  - unzip protoc-3.3.0-linux-x86_64.zip -d protoc && rm protoc-3.3.0-linux-x86_64.zip
-  - export PATH=$(pwd)/protoc/bin:"${PATH}"
-  - git clone https://github.com/grpc/grpc.git
-  - cd grpc && git checkout tags/v1.4.1
-  - git submodule update --init && make grpc_python_plugin
-  - export PATH=$(pwd)/grpc-1.4.1/bin/opt:"${PATH}"
-script:
-  - echo $(c++ --version) && echo $(g++ --version)
+  - go get google.golang.org/grpc
+  - sudo pip install grpcio
