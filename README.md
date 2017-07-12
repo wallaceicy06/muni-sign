@@ -1,4 +1,4 @@
-# Muni Sign
+# Muni Sign [![Build Status](https://travis-ci.org/wallaceicy06/muni-sign.svg?branch=master)](https://travis-ci.org/wallaceicy06/muni-sign)
 
 Software for displaying Nextbus arrival information on a physical LCD display.
 
