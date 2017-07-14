@@ -11,6 +11,7 @@ import (
 	"os/signal"
 
 	"github.com/wallaceicy06/muni-sign/admin/config"
+	pb "github.com/wallaceicy06/muni-sign/proto"
 )
 
 var templates = template.Must(template.ParseFiles("templates/index.html"))
@@ -28,6 +29,7 @@ func main() {
 
 	if *configFilePath == "" {
 		fmt.Fprintln(os.Stderr, "A config file path is required.")
+		flag.Usage()
 		os.Exit(1)
 	}
 
@@ -64,19 +66,56 @@ func (s *server) serve() *http.Server {
 }
 
 func (s *server) rootHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := s.cfg.Get()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
-		return
+	switch r.Method {
+	case http.MethodGet:
+		c, err := s.cfg.Get()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
+			return
+		}
+		renderRoot(c, w)
+	case http.MethodPost:
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
+			return
+		}
+		agency := r.Form.Get("agency")
+		if agency == "" {
+			http.Error(w, "Agency must be provided.", http.StatusBadRequest)
+			return
+		}
+		stopId := r.Form.Get("stopId")
+		if stopId == "" {
+			http.Error(w, fmt.Sprintf("Stop ID must be provided."), http.StatusBadRequest)
+			return
+		}
+
+		c := &pb.Configuration{
+			Agency:  agency,
+			StopIds: []string{stopId},
+		}
+		if err := s.cfg.Put(c); err != nil {
+			http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
+			return
+		}
+		renderRoot(c, w)
+	default:
+
+		http.Error(w, fmt.Sprintf("Unsupported method: %s.", r.Method), http.StatusMethodNotAllowed)
 	}
+
+}
+
+func renderRoot(cfg *pb.Configuration, w http.ResponseWriter) {
 	// Make sure that the configuration is not nil so that the server can return
 	// an error before rendering the template.
-	if c == nil {
-		http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
+	if cfg == nil {
+		http.Error(w, fmt.Sprintf("Internal error: configuration is nil."), http.StatusInternalServerError)
 		return
 	}
-	if err := templates.ExecuteTemplate(w, "index.html", c); err != nil {
+	if err := templates.ExecuteTemplate(w, "index.html", cfg); err != nil {
 		log.Printf("Problem rendering HTML template: %v", err)
 		return
 	}
+
 }
