@@ -100,7 +100,6 @@ func (s *server) rootHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		renderRoot(c, w)
 	default:
-
 		http.Error(w, fmt.Sprintf("Unsupported method: %s.", r.Method), http.StatusMethodNotAllowed)
 	}
 
