@@ -1,0 +1,22 @@
+{{ define "index-content" }}
+<h1>MUNI Sign Configuration</h1>
+
+<p>Welcome!</p>
+
+<div>
+  <h3>Current Configuration</h3>
+  <div>Agency: <span>{{.Agency}}</span></div>
+  {{range .StopIds}}
+    <div>Stop ID: <span>{{.}}</span></div>
+  {{end}}
+</div>
+
+<div>
+  <h3>New Configuration</h3>
+  <form action="/" method="POST">
+    <div>Agency: <input type="text" name="agency"></div>
+    <div>Stop ID: <input type="text" name="stopId"></div>
+    <input type="submit" value="Submit">
+  </form>
+</div>
+{{ end }}

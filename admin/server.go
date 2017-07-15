@@ -14,7 +14,7 @@ import (
 	pb "github.com/wallaceicy06/muni-sign/proto"
 )
 
-var templates = template.Must(template.ParseFiles("templates/index.html"))
+var templates = template.Must(template.ParseFiles("templates/index.html", "templates/home.html"))
 
 var configFilePath = flag.String("config_file", "", "the path to the file that stores the configuration for the sign")
 var port = flag.Int("port", 8080, "the port to serve this webserver")
@@ -55,6 +55,7 @@ func (s *server) serve() *http.Server {
 	}
 
 	http.HandleFunc("/", s.rootHandler)
+	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {

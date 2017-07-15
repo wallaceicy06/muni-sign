@@ -1,20 +1,21 @@
-<h1>MUNI Sign Configuration</h1>
+<!doctype html>
 
-<p>Welcome!</p>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
 
-<div>
-  <h3>Current Configuration</h3>
-  <div>Agency: <span>{{.Agency}}</span></div>
-  {{range .StopIds}}
-    <div>Stop ID: <span>{{.}}</span></div>
-  {{end}}
-</div>
+    <title>MUNI Sign Configuration</title>
+    <meta name="description" content="Configuration for the MUNI sign">
+    <meta name="author" content="Sean Harger">
 
-<div>
-  <h3>New Configuration</h3>
-  <form action="/" method="POST">
-    <div>Agency: <input type="text" name="agency"></div>
-    <div>Stop ID: <input type="text" name="stopId"></div>
-    <input type="submit" value="Submit">
-  </form>
-</div>
+    <link rel="stylesheet" href="/public/css/styles.css?v=1.0">
+
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    {{template "index-content" .}}
+  </body>
+</html>
