@@ -1,0 +1,27 @@
+{{ define "index-content" }}
+<h1>MUNI Sign Configuration</h1>
+
+<img src="/public/images/muni_train.jpg" alt="SF MUNI Train in front of Bay Bridge">
+
+<p>Welcome!</p>
+<p>To configure your MUNI Sign, select an agency and a stop ID and submit the
+form below. You can obtain this information by visiting <a
+href="http://www.nextbus.com" target="_blank">Nextbus' website</a>.</p>
+
+<div>
+  <h3>Current Configuration</h3>
+  <div>Agency: <span>{{.Agency}}</span></div>
+  {{range .StopIds}}
+    <div>Stop ID: <span>{{.}}</span></div>
+  {{end}}
+</div>
+
+<div>
+  <h3>New Configuration</h3>
+  <form action="/" method="POST">
+    <div>Agency: <input type="text" name="agency"></div>
+    <div>Stop ID: <input type="text" name="stopId"></div>
+    <input type="submit" value="Submit">
+  </form>
+</div>
+{{ end }}
