@@ -12,7 +12,15 @@ message Configuration {
 }
 
 service Nextbus { 
+  rpc ListAgencies (ListAgenciesRequest) returns (ListAgenciesResponse);
   rpc ListPredictions (ListPredictionsRequest) returns (ListPredictionsResponse);
+}
+
+message ListAgenciesRequest {
+}
+
+message ListAgenciesResponse {
+  repeated Agency agencies = 1;
 }
 
 message ListPredictionsRequest {
@@ -25,6 +33,14 @@ message ListPredictionsRequest {
 
 message ListPredictionsResponse {
   repeated Prediction predictions = 1;
+}
+
+message Agency {
+  // The unique tag for the agency.
+  string tag = 1;
+
+  // The human-friendly name for the agency.
+  string name = 2;
 }
 
 message Prediction {

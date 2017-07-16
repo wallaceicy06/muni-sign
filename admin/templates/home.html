@@ -10,8 +10,8 @@ href="http://www.nextbus.com" target="_blank">Nextbus' website</a>.</p>
 
 <div>
   <h3>Current Configuration</h3>
-  <div>Agency: <span>{{.Agency}}</span></div>
-  {{range .StopIds}}
+  <div>Agency: <span>{{.Cfg.Agency}}</span></div>
+  {{range .Cfg.StopIds}}
     <div>Stop ID: <span>{{.}}</span></div>
   {{end}}
 </div>
@@ -19,9 +19,18 @@ href="http://www.nextbus.com" target="_blank">Nextbus' website</a>.</p>
 <div>
   <h3>New Configuration</h3>
   <form action="/" method="POST">
-    <div>Agency: <input type="text" name="agency"></div>
+    <div>Agency: 
+      <select name="agency">
+        {{range .Agencies}}
+          <option label={{.Name}} value={{.Tag}}>
+        {{end}}
+      </select>
+    </div>
     <div>Stop ID: <input type="text" name="stopId"></div>
     <input type="submit" value="Submit">
   </form>
 </div>
+
+<datalist id="agencies">
+</datalist>
 {{ end }}

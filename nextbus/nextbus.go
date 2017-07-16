@@ -18,6 +18,7 @@ import (
 )
 
 type nextbus interface {
+	GetAgencyList() ([]nb.Agency, error)
 	GetStopPredictions(agencyTag string, stopID string) ([]nb.PredictionData, error)
 }
 
@@ -64,6 +65,20 @@ func (s *server) serve() *grpc.Server {
 	return grpcSrv
 }
 
+func (s *server) ListAgencies(ctx context.Context, req *pb.ListAgenciesRequest) (*pb.ListAgenciesResponse, error) {
+	agencies, err := s.nbClient.GetAgencyList()
+	if err != nil {
+		return nil, grpc.Errorf(codes.Internal, "Problem getting agency list: %v", err)
+	}
+
+	res := &pb.ListAgenciesResponse{}
+	for _, a := range agencies {
+		res.Agencies = append(res.Agencies, &pb.Agency{Tag: a.Tag, Name: a.Title})
+	}
+
+	return res, nil
+}
+
 func (s *server) ListPredictions(ctx context.Context, req *pb.ListPredictionsRequest) (*pb.ListPredictionsResponse, error) {
 	if req.Agency == "" {
 		return nil, grpc.Errorf(codes.InvalidArgument, "Agency is required.")
@@ -72,7 +87,7 @@ func (s *server) ListPredictions(ctx context.Context, req *pb.ListPredictionsReq
 		return nil, grpc.Errorf(codes.InvalidArgument, "StopID is required.")
 	}
 
-	preds, err := nb.DefaultClient.GetStopPredictions(req.Agency, req.StopId)
+	preds, err := s.nbClient.GetStopPredictions(req.Agency, req.StopId)
 	if err != nil {
 		return nil, grpc.Errorf(codes.Internal, "Problem getting predictions: %v", err)
 	}
