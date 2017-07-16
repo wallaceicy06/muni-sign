@@ -2,22 +2,23 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"net/http"
 	"time"
 
 	"google.golang.org/grpc"
 
-	"github.com/golang/protobuf/proto"
 	pb "github.com/wallaceicy06/muni-sign/proto"
 )
 
 const configFile = "/Users/sean/muni_sign_config.pb.txt"
 
 var displayAddr = flag.String("display_addr", "raspberrypi.local:50051", "The display server address in the format of host:port")
-var nextbusAddr = flag.String("nextbus_addr", "localhost:8080", "The nextbus server address in the format of host:port")
+var nextbusAddr = flag.String("nextbus_addr", "localhost:8081", "The nextbus server address in the format of host:port")
+var adminAddr = flag.String("admin_addr", "http://localhost:8080", "The admin server address to use in the format http://host:port")
 
 var colors = []*pb.Color{
 	{
@@ -103,13 +104,13 @@ func main() {
 }
 
 func readConfigFile() (*pb.Configuration, error) {
-	data, err := ioutil.ReadFile(configFile)
-
+	res, err := http.Get(fmt.Sprintf("%s/api/config", *adminAddr))
 	if err != nil {
-		return nil, fmt.Errorf("error reading file: %v", err)
+		return nil, fmt.Errorf("error getting config from admin server: %v", err)
 	}
+
 	parsedConfig := &pb.Configuration{}
-	if err := proto.UnmarshalText(string(data), parsedConfig); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(parsedConfig); err != nil {
 		return nil, fmt.Errorf("error unmarshalling config proto: %v", err)
 	}
 	return parsedConfig, nil
