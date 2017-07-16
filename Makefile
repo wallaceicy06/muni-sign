@@ -9,3 +9,7 @@ clean: $(SUBDIRS)
 	for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done
+test: $(SUBDIRS)
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir test; \
+	done

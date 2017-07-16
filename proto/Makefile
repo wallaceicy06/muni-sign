@@ -4,4 +4,5 @@ build: muni_sign.proto
 clean:
 	rm -f *.pb.go
 	rm -f *_pb2.py *_pb2_grpc.py
-
+test:
+	true
