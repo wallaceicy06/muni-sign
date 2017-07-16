@@ -135,7 +135,7 @@ func TestUpdateConfig(t *testing.T) {
 		wantCfg    *pb.Configuration
 	}{
 		{
-			name:       "Good",
+			name:       "OneStop",
 			cfg:        &fakeConfig{cfg: testConfig},
 			formAgency: "sf-muni",
 			formStopID: "5678",
@@ -143,6 +143,28 @@ func TestUpdateConfig(t *testing.T) {
 			wantCfg: &pb.Configuration{
 				Agency:  "sf-muni",
 				StopIds: []string{"5678"},
+			},
+		},
+		{
+			name:       "MultipleStops",
+			cfg:        &fakeConfig{cfg: testConfig},
+			formAgency: "sf-muni",
+			formStopID: "1234 5678 9012",
+			wantCode:   http.StatusOK,
+			wantCfg: &pb.Configuration{
+				Agency:  "sf-muni",
+				StopIds: []string{"1234", "5678", "9012"},
+			},
+		},
+		{
+			name:       "MultipleStopsExtraSpaces",
+			cfg:        &fakeConfig{cfg: testConfig},
+			formAgency: "sf-muni",
+			formStopID: "      1234  5678        9012  ",
+			wantCode:   http.StatusOK,
+			wantCfg: &pb.Configuration{
+				Agency:  "sf-muni",
+				StopIds: []string{"1234", "5678", "9012"},
 			},
 		},
 		{
@@ -154,12 +176,12 @@ func TestUpdateConfig(t *testing.T) {
 			wantCfg:    testConfig,
 		},
 		{
-			name:       "MissingStopID",
+			name:       "EmptyStopIds",
 			cfg:        &fakeConfig{cfg: testConfig},
 			formAgency: "sf-muni",
 			formStopID: "",
-			wantCode:   http.StatusBadRequest,
-			wantCfg:    testConfig,
+			wantCode:   http.StatusOK,
+			wantCfg:    &pb.Configuration{Agency: "sf-muni"},
 		},
 		{
 			name:       "ConfigPutError",
@@ -176,7 +198,7 @@ func TestUpdateConfig(t *testing.T) {
 			srv := newServer(testPort, goodFakeNb, test.cfg)
 			rec := httptest.NewRecorder()
 
-			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(fmt.Sprintf("agency=%s&stopId=%s", test.formAgency, test.formStopID)))
+			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(fmt.Sprintf("agency=%s&stopIds=%s", test.formAgency, test.formStopID)))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 			srv.rootHandler(rec, req)
