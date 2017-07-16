@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -186,12 +188,77 @@ func TestUpdateConfig(t *testing.T) {
 	}
 }
 
-func TestInvalidMethod(t *testing.T) {
+func TestRootInvalidMethod(t *testing.T) {
 	srv := newServer(testPort, goodFakeNb, &fakeConfig{})
 	rec := &httptest.ResponseRecorder{}
 
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	srv.rootHandler(rec, req)
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Errorf("rec.Code = %d, want %d", rec.Code, http.StatusMethodNotAllowed)
+	}
+}
+
+func TestApiConfigGet(t *testing.T) {
+	tests := []struct {
+		name    string
+		fakeCfg *fakeConfig
+		wantErr bool
+	}{
+		{
+			name:    "Good",
+			fakeCfg: &fakeConfig{cfg: testConfig},
+			wantErr: false,
+		},
+		{
+			name:    "Error",
+			fakeCfg: &fakeConfig{getErr: errors.New("fake config get error")},
+			wantErr: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			srv := newServer(testPort, goodFakeNb, test.fakeCfg)
+			rec := httptest.NewRecorder()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/config", nil)
+			srv.apiConfigHandler(rec, req)
+			res := rec.Result()
+
+			if test.wantErr {
+				if res.StatusCode == http.StatusOK {
+					t.Error("get API config got OK, want error")
+				}
+				return
+			}
+
+			if res.StatusCode != http.StatusOK {
+				t.Errorf("get API config got code %d want %d", res.StatusCode, http.StatusOK)
+			}
+
+			got := &pb.Configuration{}
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				t.Fatalf("error reading API config response: %v", err)
+			}
+			if err := json.Unmarshal(body, got); err != nil {
+				t.Fatalf("error unmarshaling JSON response: %v", err)
+			}
+
+			if !proto.Equal(got, test.fakeCfg.cfg) {
+				t.Errorf("configuration does not match: got %v want %v", got, test.fakeCfg.cfg)
+			}
+		})
+	}
+}
+
+func TestApiConfigInvalidMethod(t *testing.T) {
+	srv := newServer(testPort, goodFakeNb, &fakeConfig{})
+	rec := &httptest.ResponseRecorder{}
+
+	req := httptest.NewRequest(http.MethodPost, "/api/config", nil)
+	srv.apiConfigHandler(rec, req)
 	if rec.Code != http.StatusMethodNotAllowed {
 		t.Errorf("rec.Code = %d, want %d", rec.Code, http.StatusMethodNotAllowed)
 	}
