@@ -26,6 +26,11 @@ var colors = []*pb.Color{
 		Blue:  0.0,
 	},
 	{
+		Red:   1.0,
+		Green: 1.0,
+		Blue:  0.0,
+	},
+	{
 		Red:   0.0,
 		Green: 1.0,
 		Blue:  0.0,
@@ -34,6 +39,11 @@ var colors = []*pb.Color{
 		Red:   0.0,
 		Green: 0.0,
 		Blue:  1.0,
+	},
+	{
+		Red:   0.6,
+		Green: 0.0,
+		Blue:  0.8,
 	},
 }
 
