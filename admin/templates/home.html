@@ -26,7 +26,7 @@ href="http://www.nextbus.com" target="_blank">Nextbus' website</a>.</p>
         {{end}}
       </select>
     </div>
-    <div>Stop ID: <input type="text" name="stopId" value="{{index $.Cfg.StopIds 0}}"></div>
+    <div>Stop IDs <em>(separated by space)</em>: <input type="text" name="stopIds" value="{{range $i, $e := .Cfg.StopIds}}{{if ne $i 0}} {{end}}{{$e}}{{end}}"></div>
     <input type="submit" value="Submit">
   </form>
 </div>
