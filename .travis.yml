@@ -11,3 +11,5 @@ before_script:
   - go get -u github.com/golang/protobuf/protoc-gen-go
   - go get -u google.golang.org/grpc
   - sudo pip install grpcio-tools
+script:
+  - make && make test
