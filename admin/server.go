@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -125,12 +124,15 @@ func (s *server) rootHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Agency must be provided.", http.StatusBadRequest)
 			return
 		}
-		stopIdStr := r.Form.Get("stopIds")
-		stopIds := strings.Fields(stopIdStr)
+		stopId := r.Form.Get("stopId")
+		if stopId == "" {
+			http.Error(w, fmt.Sprintf("Stop ID must be provided."), http.StatusBadRequest)
+			return
+		}
 
 		c := &pb.Configuration{
 			Agency:  agency,
-			StopIds: stopIds,
+			StopIds: []string{stopId},
 		}
 		if err := s.cfg.Put(c); err != nil {
 			http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
