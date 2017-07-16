@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -92,6 +93,7 @@ func (s *server) serve() *http.Server {
 	}
 
 	http.HandleFunc("/", s.rootHandler)
+	http.HandleFunc("/api/config", s.apiConfigHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
 	go func() {
@@ -141,6 +143,24 @@ func (s *server) rootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Unsupported method: %s.", r.Method), http.StatusMethodNotAllowed)
 	}
 
+}
+
+func (s *server) apiConfigHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		c, err := s.cfg.Get()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Internal error: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(c); err != nil {
+			log.Printf("Error writing config response: %v", err)
+		}
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported method: %s.", r.Method), http.StatusMethodNotAllowed)
+	}
 }
 
 func (s *server) getAgencies() []*pb.Agency {
