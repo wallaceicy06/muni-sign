@@ -111,7 +111,7 @@ func TestGetConfig(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			srv := newServer(testPort, goodFakeNb, test.cfg)
-			rec := &httptest.ResponseRecorder{}
+			rec := httptest.NewRecorder()
 
 			srv.rootHandler(rec, test.req)
 			res := rec.Result()
@@ -172,7 +172,7 @@ func TestUpdateConfig(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			srv := newServer(testPort, goodFakeNb, test.cfg)
-			rec := &httptest.ResponseRecorder{}
+			rec := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(fmt.Sprintf("agency=%s&stopId=%s", test.formAgency, test.formStopID)))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -192,7 +192,7 @@ func TestUpdateConfig(t *testing.T) {
 
 func TestInvalidMethod(t *testing.T) {
 	srv := newServer(testPort, goodFakeNb, &fakeConfig{})
-	rec := &httptest.ResponseRecorder{}
+	rec := httptest.NewRecorder()
 
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	srv.rootHandler(rec, req)
