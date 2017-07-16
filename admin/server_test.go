@@ -113,11 +113,13 @@ func TestGetConfig(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			srv := newServer(testPort, goodFakeNb, test.cfg)
-			rec := &httptest.ResponseRecorder{}
+			rec := httptest.NewRecorder()
 
 			srv.rootHandler(rec, test.req)
-			if rec.Code != test.wantCode {
-				t.Errorf("server response code unexpected, got %d want %d", rec.Code, test.wantCode)
+			res := rec.Result()
+
+			if res.StatusCode != test.wantCode {
+				t.Errorf("server response code unexpected, got %d want %d", res.StatusCode, test.wantCode)
 			}
 		})
 	}
@@ -172,14 +174,16 @@ func TestUpdateConfig(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			srv := newServer(testPort, goodFakeNb, test.cfg)
-			rec := &httptest.ResponseRecorder{}
+			rec := httptest.NewRecorder()
 
 			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(fmt.Sprintf("agency=%s&stopId=%s", test.formAgency, test.formStopID)))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 			srv.rootHandler(rec, req)
-			if rec.Code != test.wantCode {
-				t.Errorf("server response code unexpected, got %d want %d", rec.Code, test.wantCode)
+			res := rec.Result()
+
+			if res.StatusCode != test.wantCode {
+				t.Errorf("server response code unexpected, got %d want %d", res.StatusCode, test.wantCode)
 			}
 			if !proto.Equal(test.cfg.cfg, test.wantCfg) {
 				t.Errorf("configurations differ: got %v, want %v", test.cfg.cfg, test.wantCfg)
@@ -190,12 +194,14 @@ func TestUpdateConfig(t *testing.T) {
 
 func TestRootInvalidMethod(t *testing.T) {
 	srv := newServer(testPort, goodFakeNb, &fakeConfig{})
-	rec := &httptest.ResponseRecorder{}
+	rec := httptest.NewRecorder()
 
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	srv.rootHandler(rec, req)
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Errorf("rec.Code = %d, want %d", rec.Code, http.StatusMethodNotAllowed)
+	res := rec.Result()
+
+	if res.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("StatusCode = %d, want %d", res.StatusCode, http.StatusMethodNotAllowed)
 	}
 }
 
