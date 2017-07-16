@@ -8,9 +8,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+
 	pb "github.com/wallaceicy06/muni-sign/proto"
+	grpcContext "golang.org/x/net/context"
 )
 
 type fakeConfig struct {
@@ -34,6 +39,22 @@ func (fc *fakeConfig) Put(cfg *pb.Configuration) error {
 	return nil
 }
 
+type fakeNbClient struct {
+	agenciesRes *pb.ListAgenciesResponse
+	agenciesErr error
+}
+
+func (fnb *fakeNbClient) ListAgencies(ctx grpcContext.Context, req *pb.ListAgenciesRequest, _ ...grpc.CallOption) (*pb.ListAgenciesResponse, error) {
+	if fnb.agenciesErr != nil {
+		return nil, fnb.agenciesErr
+	}
+	return fnb.agenciesRes, nil
+}
+
+func (fnb *fakeNbClient) ListPredictions(ctx grpcContext.Context, req *pb.ListPredictionsRequest, _ ...grpc.CallOption) (*pb.ListPredictionsResponse, error) {
+	return nil, grpc.Errorf(codes.Unimplemented, "Fake ListPredictions is unimplemented.")
+}
+
 const testPort = 25565
 
 var testConfig = &pb.Configuration{
@@ -41,8 +62,13 @@ var testConfig = &pb.Configuration{
 	StopIds: []string{"1234", "5678"},
 }
 
+var goodFakeNb = &fakeNbClient{
+	agenciesRes: &pb.ListAgenciesResponse{
+		Agencies: []*pb.Agency{{Name: "San Francisco MTA", Tag: "sf-muni"}},
+	}}
+
 func TestServing(t *testing.T) {
-	srv := newServer(testPort, &fakeConfig{cfg: testConfig}).serve()
+	srv := newServer(testPort, goodFakeNb, &fakeConfig{cfg: testConfig}).serve()
 	defer srv.Shutdown(context.Background())
 
 	res, err := http.Get(fmt.Sprintf("http://localhost:%d", testPort))
@@ -84,7 +110,7 @@ func TestGetConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			srv := newServer(testPort, test.cfg)
+			srv := newServer(testPort, goodFakeNb, test.cfg)
 			rec := &httptest.ResponseRecorder{}
 
 			srv.rootHandler(rec, test.req)
@@ -143,7 +169,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			srv := newServer(testPort, test.cfg)
+			srv := newServer(testPort, goodFakeNb, test.cfg)
 			rec := &httptest.ResponseRecorder{}
 
 			req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(fmt.Sprintf("agency=%s&stopId=%s", test.formAgency, test.formStopID)))
@@ -161,12 +187,80 @@ func TestUpdateConfig(t *testing.T) {
 }
 
 func TestInvalidMethod(t *testing.T) {
-	srv := newServer(testPort, &fakeConfig{})
+	srv := newServer(testPort, goodFakeNb, &fakeConfig{})
 	rec := &httptest.ResponseRecorder{}
 
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	srv.rootHandler(rec, req)
 	if rec.Code != http.StatusMethodNotAllowed {
 		t.Errorf("rec.Code = %d, want %d", rec.Code, http.StatusMethodNotAllowed)
+	}
+}
+
+func TestAgencyListCache(t *testing.T) {
+	lastRefresh := time.Now()
+
+	cachedAgencies := []*pb.Agency{{
+		Name: "Los Angeles Metro",
+		Tag:  "la-metro",
+	}}
+
+	tests := []struct {
+		name    string
+		timeNow time.Time
+		fakeNb  *fakeNbClient
+		want    []*pb.Agency
+	}{
+		{
+			name:    "FetchFromServer",
+			timeNow: lastRefresh.Add(cacheTimeout + time.Second),
+			fakeNb:  goodFakeNb,
+			want: []*pb.Agency{{
+				Name: "San Francisco MTA",
+				Tag:  "sf-muni",
+			}},
+		},
+		{
+			name:    "FetchFromServerError",
+			timeNow: lastRefresh.Add(cacheTimeout + time.Second),
+			fakeNb: &fakeNbClient{
+				agenciesErr: errors.New("fake list agencies error"),
+			},
+			want: []*pb.Agency{{
+				Name: "San Francisco MTA",
+				Tag:  "sf-muni",
+			}},
+		},
+		{
+			name:    "FetchFromCache",
+			timeNow: lastRefresh.Add(cacheTimeout - time.Second),
+			fakeNb:  goodFakeNb,
+			want:    cachedAgencies,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			srv := newServer(testPort, test.fakeNb, &fakeConfig{})
+			srv.agencyCache = &agencyCache{
+				lastRefresh: lastRefresh,
+				agencies:    cachedAgencies,
+			}
+			timeNow = func() time.Time { return test.timeNow }
+
+			got := srv.getAgencies()
+			if len(got) != len(test.want) {
+				t.Fatalf("got %d agencies, want %d", len(got), len(test.want))
+			}
+
+			mismatch := false
+			for i, gotAgency := range got {
+				mismatch = mismatch && !proto.Equal(gotAgency, test.want[i])
+			}
+
+			if mismatch {
+				t.Errorf("agencies differ: got %v want %v", got, test.want)
+			}
+		})
 	}
 }
