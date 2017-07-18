@@ -22,7 +22,7 @@ href="http://www.nextbus.com" target="_blank">Nextbus' website</a>.</p>
     <div>Agency: 
       <select name="agency">
         {{range .Agencies}}
-          <option label={{.Name}} value={{.Tag}}>
+        <option label={{.Name}} value={{.Tag}} {{if eq (.Tag) ($.Cfg.Agency)}}selected="selected"{{end}}>
         {{end}}
       </select>
     </div>
