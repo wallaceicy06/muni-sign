@@ -1,15 +1,20 @@
-language: go
+dist: precise
 
-go:
-  - 1.8
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-      - python
-      - python-pip
-before_script:
-  - go get -u github.com/golang/protobuf/protoc-gen-go
-  - go get -u google.golang.org/grpc
-  - sudo pip install grpcio-tools
+      - wget
+      - pkg-config
+      - libstdc++6
+      - oracle-java8-installer
+
+before_install:
+  - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.5.2/bazel_0.5.2-linux-x86_64.deb
+  - sudo dpkg -i bazel_0.5.2-linux-x86_64.deb
+
 script:
-  - make && make test
+  - bazel build //...
+  - bazel test //... --test_output=all

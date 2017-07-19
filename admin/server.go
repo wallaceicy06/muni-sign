@@ -21,7 +21,7 @@ import (
 
 const cacheTimeout = 24 * time.Hour
 
-var templates = template.Must(template.ParseFiles("templates/index.html", "templates/home.html"))
+var templates = template.Must(template.ParseFiles("admin/templates/index.html", "admin/templates/home.html"))
 
 var configFilePath = flag.String("config_file", "", "the path to the file that stores the configuration for the sign")
 var nbServerAddr = flag.String("nextbus_server", "", "the address of the nextbus server")

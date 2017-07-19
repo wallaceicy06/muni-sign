@@ -2,6 +2,15 @@
 
 Software for displaying Nextbus arrival information on a physical LCD display.
 
+## Requirements
+
+In order to build this program, you will need to install
+[Bazel](https://docs.bazel.build/versions/master/install.html).
+
+```shell
+bazel build //...
+```
+
 ## Third Party
 
 This project makes use of the following third party libraries:
