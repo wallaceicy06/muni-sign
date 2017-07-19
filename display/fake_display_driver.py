@@ -4,8 +4,7 @@ import time
 
 import grpc
 
-from ..proto import muni_sign_pb2
-from ..proto import muni_sign_pb2_grpc
+from proto import muni_sign_pb2
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -45,7 +44,7 @@ class FakeLCD(object):
                                                               self.color.blue, 
                                                               self.msg)
 
-class DisplayDriver(muni_sign_pb2_grpc.DisplayDriverServicer):
+class DisplayDriver(muni_sign_pb2.DisplayDriverServicer):
 
     def __init__(self, lcd):
         self.lcd = lcd
@@ -60,7 +59,7 @@ def serve():
     lcd = FakeLCD()
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    muni_sign_pb2_grpc.add_DisplayDriverServicer_to_server(DisplayDriver(lcd), server)
+    muni_sign_pb2.add_DisplayDriverServicer_to_server(DisplayDriver(lcd), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     try:
