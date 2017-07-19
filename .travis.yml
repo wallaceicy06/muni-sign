@@ -11,6 +11,7 @@ addons:
       - oracle-java8-installer
 
 before_install:
+  - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
   - wget https://github.com/bazelbuild/bazel/releases/download/0.5.2/bazel_0.5.2-linux-x86_64.deb
   - sudo dpkg -i bazel_0.5.2-linux-x86_64.deb
 
